@@ -1,0 +1,19 @@
+***STREAMLIT -
+cd E:\COLLEGE\VIT\sampleproject\MindWatch-Demo
+
+venv\Scripts\activate
+
+streamlit run streamlit_app.py
+
+**FIREBASE LOGIN -
+cd E:\COLLEGE\VIT\sampleproject\MindWatch-Demo
+
+ python -m http.server 5500
+
+**MODEL RUN -
+cd E:\COLLEGE\VIT\sampleproject\MindWatch-Demo
+
+python -m chatbot.api_server
+
+
+

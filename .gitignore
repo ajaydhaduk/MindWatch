@@ -1,0 +1,14 @@
+node_modules/
+.cache/
+venv/
+.venv/
+__pycache__/
+dist/
+build/
+.env
+*.log
+*.tmp
+*.pt
+*.pth
+*.bin
+*.safetensors

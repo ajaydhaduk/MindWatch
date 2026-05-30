@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindWatch - Login</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-purple: #8b5cf6;
+            --primary-blue: #3b82f6;
+            --primary-cyan: #06b6d4;
+            --primary-pink: #ec4899;
+            --bg-dark: #0a0118;
+            --glass: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0118 0%, #1a0b2e 50%, #050008 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        /* Animated Background */
+        .bg-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+        
+        .shape {
+            position: absolute;
+            opacity: 0.15;
+            filter: blur(60px);
+        }
+        
+        .shape-1 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, var(--primary-purple), transparent);
+            top: -10%;
+            left: -10%;
+            animation: float 25s infinite ease-in-out;
+        }
+        
+        .shape-2 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, var(--primary-blue), transparent);
+            bottom: -15%;
+            right: -10%;
+            animation: float 20s infinite ease-in-out 5s;
+        }
+        
+        .shape-3 {
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, var(--primary-cyan), transparent);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulse 15s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0%, 100% { 
+                transform: translate(0, 0) scale(1) rotate(0deg);
+            }
+            25% { 
+                transform: translate(100px, -100px) scale(1.1) rotate(90deg);
+            }
+            50% { 
+                transform: translate(-50px, 100px) scale(0.9) rotate(180deg);
+            }
+            75% { 
+                transform: translate(80px, 50px) scale(1.05) rotate(270deg);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { 
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.1;
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1.3);
+                opacity: 0.2;
+            }
+        }
+        
+        /* Main Container */
+        .container {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            min-height: 100vh;
+            max-width: 1400px;
+            margin: 0 auto;
+            overflow-y: auto;
+        }
+        
+        /* Left Side - Login */
+        .left-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            position: relative;
+            overflow: visible;
+            min-height: 100vh;
+        }
+        
+        .login-box {
+            width: 100%;
+            max-width: 480px;
+            padding: 3rem;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideInLeft 0.8s ease-out;
+            position: relative;
+            z-index: 2;
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 2.5rem;
+        }
+        
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary-purple), var(--primary-blue));
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4);
+        }
+        
+        .logo-text {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, var(--primary-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .welcome-text {
+            margin-bottom: 2rem;
+        }
+        
+        .welcome-text h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .welcome-text p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        
+        .form-group:nth-child(1) { animation-delay: 0.2s; }
+        .form-group:nth-child(2) { animation-delay: 0.3s; }
+        .form-group:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+        
+        .form-input:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary-purple);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+        
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-purple), var(--primary-blue));
+            color: white;
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+            margin-bottom: 1rem;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(139, 92, 246, 0.6);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        
+        .btn-google {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+        
+        .btn-google:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+        
+        .google-icon {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .divider::before {
+            margin-right: 1rem;
+        }
+        
+        .divider::after {
+            margin-left: 1rem;
+        }
+        
+        /* Right Side - Signup */
+        .right-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            position: relative;
+            min-height: 100vh;
+        }
+        
+        .signup-box {
+            width: 100%;
+            max-width: 480px;
+            padding: 3rem;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideInRight 0.8s ease-out;
+            position: relative;
+            z-index: 2;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .signup-box h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .signup-box p {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+        
+        /* Floating Shapes in Sections */
+        .floating-shape {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-purple), var(--primary-cyan));
+            opacity: 0.1;
+            animation: floating 8s infinite ease-in-out;
+        }
+        
+        .floating-shape-1 {
+            width: 150px;
+            height: 150px;
+            top: 10%;
+            left: 5%;
+            animation-delay: 0s;
+        }
+        
+        .floating-shape-2 {
+            width: 100px;
+            height: 100px;
+            bottom: 15%;
+            right: 8%;
+            animation-delay: 2s;
+        }
+        
+        .floating-shape-3 {
+            width: 120px;
+            height: 120px;
+            top: 60%;
+            left: 10%;
+            animation-delay: 4s;
+        }
+        
+        .floating-shape-4 {
+            width: 90px;
+            height: 90px;
+            top: 20%;
+            right: 15%;
+            animation-delay: 1s;
+        }
+        
+        @keyframes floating {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            25% {
+                transform: translateY(-30px) rotate(90deg);
+            }
+            50% {
+                transform: translateY(0) rotate(180deg);
+            }
+            75% {
+                transform: translateY(30px) rotate(270deg);
+            }
+        }
+        
+        .switch-text {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .switch-link {
+            color: var(--primary-cyan);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        
+        .switch-link:hover {
+            color: var(--primary-purple);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 968px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .left-section,
+            .right-section {
+                min-height: 100vh;
+            }
+            
+            .floating-shape {
+                display: none;
+            }
+        }
+          @media (max-width: 968px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .left-section,
+            .right-section {
+                min-height: auto;  
+                padding: 2rem 1.5rem;
+            }}
+        @media (max-width: 640px) {
+            .left-section,
+            .right-section {
+                padding: 2rem 1.5rem;
+            }
+            
+            .login-box,
+            .signup-box {
+                padding: 2rem;
+            }
+            
+            .welcome-text h2,
+            .signup-box h2 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background Shapes -->
+    <div class="bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+    
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Left Section - Login -->
+        <div class="left-section" id="loginSection">
+            <div class="floating-shape floating-shape-1"></div>
+            <div class="floating-shape floating-shape-2"></div>
+            
+            <div class="login-box">
+                <div class="logo">
+                    <div class="logo-icon">🧠</div>
+                    <span class="logo-text">MindWatch</span>
+                </div>
+                
+                <div class="welcome-text">
+                    <h2>Welcome Back</h2>
+                    <p>Sign in to continue your wellness journey</p>
+                </div>
+                
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label class="form-label">Email or Username</label>
+                        <input type="text" class="form-input" placeholder="Enter your email or username" id="loginEmail">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-input" placeholder="Enter your password" id="loginPassword">
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">
+                            Sign In
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="divider">OR</div>
+                
+
+                <button class="btn btn-google" onclick="loginGoogle()">
+                    <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Continue with Google
+                </button>
+                
+                <div class="switch-text">
+                    Don't have an account? <a href="#" class="switch-link" onclick="switchToSignup(event)">Sign Up</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Section - Signup -->
+        <div class="right-section" id="signupSection">
+            <div class="floating-shape floating-shape-3"></div>
+            <div class="floating-shape floating-shape-4"></div>
+            
+            <div class="signup-box">
+                <div class="logo">
+                    <div class="logo-icon">🧠</div>
+                    <span class="logo-text">MindWatch</span>
+                </div>
+                
+                <h2>Create Account</h2>
+                <p>Start your mental wellness journey today</p>
+                
+                <form id="signupForm">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" class="form-input" placeholder="Enter your name" id="signupName">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" class="form-input" placeholder="Enter your email" id="signupEmail">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-input" placeholder="Create a password" id="signupPassword">
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">
+                            Create Account
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="divider">OR</div>
+                
+                <button class="btn btn-google" onclick="loginGoogle()">
+                    <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Sign up with Google
+                </button>
+                
+                <div class="switch-text">
+                    Already have an account? <a href="#" class="switch-link" onclick="switchToLogin(event)">Sign In</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyABX9nSQtIVFEj8xGEOomkvS8luPaPlTXI",
+            authDomain: "mental-health-rec.firebaseapp.com",
+            projectId: "mental-health-rec",
+            storageBucket: "mental-health-rec.appspot.com",
+            messagingSenderId: "1089237006544",
+            appId: "1:1089237006544:web:319309f6702dbf9c3d86d5",
+            measurementId: "G-28991N73PH"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        
+        // Google Sign In
+        function loginGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            
+            provider.setCustomParameters({
+                prompt: "select_account"
+            });
+            
+            firebase.auth()
+                .signInWithPopup(provider)
+                .then((result) => {
+                    const user = result.user;
+                    
+                    const userData = {
+                        name: user.displayName,
+                        email: user.email,
+                        picture: user.photoURL
+                    };
+                    
+                    // Encode user data
+                    const encoded = encodeURIComponent(JSON.stringify(userData));
+                    
+                    // Redirect to Streamlit with user data
+                    window.location.href = `http://localhost:8501/?user=${encoded}`;
+                })
+                .catch((error) => {
+                    alert(error.message);
+                });
+        }
+        
+        // Switch between Login and Signup
+        function switchToSignup(e) {
+            e.preventDefault();
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('signupSection').style.display = 'flex';
+        }
+        
+        function switchToLogin(e) {
+            e.preventDefault();
+            document.getElementById('signupSection').style.display = 'none';
+            document.getElementById('loginSection').style.display = 'flex';
+        }
+        
+        // Form Handlers
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            // ── Admin Hardcoded Credentials ──────────────────────────────────
+            // Checked BEFORE Firebase — no network call made for admin login
+            if (email === 'admin' && password === 'admin') {
+                window.location.href = 'http://localhost:8501/?admin=true';
+                return;
+            }
+
+            // ── Regular Firebase User Login ──────────────────────────────────
+            firebase.auth()
+                .signInWithEmailAndPassword(email, password)
+                .then((result) => {
+                    const user = result.user;
+                    
+                    const userData = {
+                        name: user.displayName || user.email.split('@')[0],
+                        email: user.email,
+                        picture: user.photoURL || ''
+                    };
+                    
+                    const encoded = encodeURIComponent(JSON.stringify(userData));
+                    window.location.href = `http://localhost:8501/?user=${encoded}`;
+                })
+                .catch((error) => {
+                    alert(error.message);
+                });
+        });
+        
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            
+            firebase.auth()
+                .createUserWithEmailAndPassword(email, password)
+                .then((result) => {
+                    const user = result.user;
+                    
+                    // Update profile with name
+                    return user.updateProfile({
+                        displayName: name
+                    }).then(() => {
+                        const userData = {
+                            name: name,
+                            email: user.email,
+                            picture: user.photoURL || ''
+                        };
+                        
+                        const encoded = encodeURIComponent(JSON.stringify(userData));
+                        window.location.href = `http://localhost:8501/?user=${encoded}`;
+                    });
+                })
+                .catch((error) => {
+                    alert(error.message);
+                });
+        });
+        
+        // Initial state - show only login on desktop, both on mobile
+        if (window.innerWidth > 968) {
+            document.getElementById('signupSection').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
